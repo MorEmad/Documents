@@ -214,7 +214,7 @@ After completing the above steps, your `AndroidManifest.xml` should look like th
             tools:replace="android:exported" />
     </application>
 </manifest>
-
+```
 
 #### Step 3: Initialization in `main.dart`
 
@@ -254,7 +254,7 @@ class MyApp extends StatelessWidget {
   }
 }
 ```
-
+---
 #### Step 4: Request Permissions
 
 Ensure the app properly requests location permissions:

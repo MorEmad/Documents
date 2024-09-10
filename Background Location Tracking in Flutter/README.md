@@ -119,15 +119,73 @@ Future<void> sendLocation(Dio dio, int counter) async {
 }
 ```
 
-#### Step 2: Update `AndroidManifest.xml`
+### Step 2: Update `AndroidManifest.xml`
 
-Add the necessary permissions and services in `android/app/src/main/AndroidManifest.xml`:
+To properly enable background location tracking, you need to modify the `AndroidManifest.xml` file. This involves adding the necessary permissions, services, and declaring the appropriate namespaces.
+
+#### Step-by-Step Instructions:
+
+1. **Add Permissions**: These permissions are needed to access the device's location and use background services.
+
+    In your `android/app/src/main/AndroidManifest.xml`, inside the `<manifest>` tag (at the top of the file), add the following permissions:
+
+    ```xml
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+    <uses-permission android:name="android.permission.ACCESS_BACKGROUND_LOCATION" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+    ```
+
+    These permissions ensure that your app can access the internet, get the location (both fine and coarse), and run location services in the background.
+
+2. **Declare the `tools` Namespace**: To modify the service configuration in Android, you'll need to use the `tools` namespace. This allows you to override certain attributes.
+
+    In the `<manifest>` tag (right after the `xmlns:android`), add the following line to declare the `tools` namespace:
+
+    ```xml
+    xmlns:tools="http://schemas.android.com/tools"
+    ```
+
+    This is necessary because later, we will be using `tools:replace="android:exported"` to override the default exported value of the service.
+
+3. **Add the Service Declaration**: Background location tracking requires a foreground service. This service needs to be declared inside the `<application>` tag.
+
+    Add the following code inside the `<application>` tag (after the `<activity>` tag):
+
+    ```xml
+    <service
+        android:name="id.flutter.flutter_background_service.BackgroundService"
+        android:exported="false"
+        android:foregroundServiceType="location"
+        tools:replace="android:exported" />
+    ```
+
+    This declaration enables the background service for location tracking.
+
+4. **Check the `MainActivity` Declaration**: Ensure that your `MainActivity` is properly declared in the `<application>` tag, like this:
+
+    ```xml
+    <activity
+        android:name=".MainActivity"
+        android:exported="true">
+        <intent-filter>
+            <action android:name="android.intent.action.MAIN" />
+            <category android:name="android.intent.category.LAUNCHER" />
+        </intent-filter>
+    </activity>
+    ```
+
+#### Final Example of `AndroidManifest.xml`
+
+After completing the above steps, your `AndroidManifest.xml` should look like this:
 
 ```xml
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     package="com.example.yourapp">
 
+    <!-- Permissions -->
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
@@ -137,6 +195,8 @@ Add the necessary permissions and services in `android/app/src/main/AndroidManif
     <application
         android:label="YourApp"
         android:icon="@mipmap/ic_launcher">
+
+        <!-- MainActivity -->
         <activity
             android:name=".MainActivity"
             android:exported="true">
@@ -146,6 +206,7 @@ Add the necessary permissions and services in `android/app/src/main/AndroidManif
             </intent-filter>
         </activity>
 
+        <!-- Background Service for Location Tracking -->
         <service
             android:name="id.flutter.flutter_background_service.BackgroundService"
             android:exported="false"
@@ -153,7 +214,7 @@ Add the necessary permissions and services in `android/app/src/main/AndroidManif
             tools:replace="android:exported" />
     </application>
 </manifest>
-```
+
 
 #### Step 3: Initialization in `main.dart`
 
